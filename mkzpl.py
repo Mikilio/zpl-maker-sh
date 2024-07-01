@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 import os
 import zpl
 import argparse
@@ -9,9 +11,9 @@ import math
 height = 100 # in mm
 width = 60 # in mm
 dpmm = 12.0 # dots per mm
-x = 3 # width of narrow bar in dots
 padding= 3  #padding around barcode in mm
 bar_height = 10
+bar_width = 24
 label_height = 4 #TODO calculate
 
 def print_table(rows, cols, strings):
@@ -21,7 +23,7 @@ def print_table(rows, cols, strings):
     l = zpl.Label(height, width, dpmm = dpmm)
     l.set_default_font( label_height * 0.8, 2)
     max_len = max(len(s) for s in strings)
-    bar_width = (34 + max_len*11 ) * x / dpmm #assuming code 128
+    x = math.floor(bar_width * dpmm / (34 + max_len*11 )) # assuming code 128
     required_width = (bar_width + 2 * padding) * cols
     required_height = ( bar_height + 2 * padding + label_height) * rows
 
@@ -29,7 +31,7 @@ def print_table(rows, cols, strings):
         print(f"""
             With the parameters specified it won't fit on your label"
             required height is {required_height}
-            required height is {required_height}
+            required width is {required_width}
         """)
         sys.exit(1)
 
@@ -37,25 +39,27 @@ def print_table(rows, cols, strings):
         for j in range(0, cols):
             try:
                 s = strings[i*cols+j]
-                l.origin(
-                    j * (bar_width + 2 * padding) + padding ,
-                    i * (bar_height + 2 * padding + label_height) + padding
-                )
-                l.barcode(
-                    'C',s,
-                    height= math.floor(bar_height * dpmm),
-                    print_interpretation_line='N'
-                )
-                l.endorigin()
-                l.origin(
-                    j * (bar_width + 2 * padding) + padding ,
-                    (i+1) * (bar_height + 2 * padding) + (i+0.2)*label_height - padding
-                )
-                l.textblock( bar_width/2, justification='C' )
-                l.write_text(s)
-                l.endorigin()
             except IndexError:
                 break
+
+            l.origin(
+                j * (bar_width + 2 * padding) + padding ,
+                i * (bar_height + 2 * padding + label_height) + padding
+            )
+            l.zpl_raw(f"^BY{x}")
+            l.barcode(
+                'C',s,
+                height= math.floor(bar_height * dpmm),
+                print_interpretation_line='N'
+            )
+            l.endorigin()
+            l.origin(
+                j * (bar_width + 2 * padding) + padding ,
+                (i+1) * (bar_height + 2 * padding) + (i+0.2)*label_height - padding
+            )
+            l.textblock( bar_width/2, justification='C' )
+            l.write_text(s)
+            l.endorigin()
     print(l.dumpZPL())
     l.preview(outputfile='./preview.png')
 
