@@ -3,10 +3,13 @@
 devenv.local.nix
 
 # preview
-preview.png
+preview.png*
 
 # direnv
 .direnv
 
 # pre-commit
 .pre-commit-config.yaml
+
+# pages
+page*

@@ -8,22 +8,23 @@ import sys
 import math
 
 
-height = 100 # in mm
-width = 60 # in mm
-dpmm = 12.0 # dots per mm
-padding= 3  #padding around barcode in mm
-bar_height = 10
-bar_width = 24
-label_height = 4 #TODO calculate
+height = 200 # in mm
+width = 104 # in mm
+dpmm = 8 # dots per mm
+padding= 2  #padding around barcode in mm
+bar_height = 14
+bar_width = 48
+label_height = 8#TODO calculate
 
 def print_table(rows, cols, strings):
     """Print a table with the specified number of rows and columns."""
 
 
     l = zpl.Label(height, width, dpmm = dpmm)
-    l.set_default_font( label_height * 0.8, 2)
+    l.set_default_font( label_height * 0.8, 4)
     max_len = max(len(s) for s in strings)
     x = math.floor(bar_width * dpmm / (34 + max_len*11 )) # assuming code 128
+    l.zpl_raw(f"^BY{x}")
     required_width = (bar_width + 2 * padding) * cols
     required_height = ( bar_height + 2 * padding + label_height) * rows
 
@@ -46,7 +47,6 @@ def print_table(rows, cols, strings):
                 j * (bar_width + 2 * padding) + padding ,
                 i * (bar_height + 2 * padding + label_height) + padding
             )
-            l.zpl_raw(f"^BY{x}")
             l.barcode(
                 'C',s,
                 height= math.floor(bar_height * dpmm),
@@ -57,7 +57,7 @@ def print_table(rows, cols, strings):
                 j * (bar_width + 2 * padding) + padding ,
                 (i+1) * (bar_height + 2 * padding) + (i+0.2)*label_height - padding
             )
-            l.textblock( bar_width/2, justification='C' )
+            l.textblock( bar_width, justification='C' )
             l.write_text(s)
             l.endorigin()
     print(l.dumpZPL())
@@ -78,7 +78,7 @@ def read_csv(file_path):
 
 def main():
     parser = argparse.ArgumentParser(description="Process some strings or a CSV file.")
-    parser.add_argument('-r', type=int, default=5, help='Number of rows (default 5)')
+    parser.add_argument('-r', type=int, default=6, help='Number of rows (default 5)')
     parser.add_argument('-c', type=int, default=2, help='Number of columns (default 2)')
     parser.add_argument('strings', nargs='*', help='List of strings to display in table')
     parser.add_argument('--csv', type=str, help='Path to a CSV file')
