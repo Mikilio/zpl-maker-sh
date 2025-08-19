@@ -30,9 +30,7 @@
     enable = true;
     requirements = ''
       zpl
-      pillow
       argparse
-      csv
     '';
   };
 

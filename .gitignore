@@ -4,6 +4,11 @@ devenv.local.nix
 
 # preview
 preview.png*
+preview*.png*
+
+output.ZPL
+
+*.txt
 
 # direnv
 .direnv

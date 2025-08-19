@@ -1,11 +1,13 @@
 #! /usr/bin/env python
 
+import tempfile
 import subprocess
+import sys
 
-shelves = ['1','2','3','4']
-sections = ['A','B','C']
-etages = [f'N{etage}' for etage in range(0,7)]
-location = ['01','02','03','04']
+shelves = ['dummy']
+sections = ['P']
+etages = [f'{etage}' for etage in range(0,9)]
+location = [f'{loc}0' for loc in range(0,4)]
 
 def main():
 
@@ -15,13 +17,22 @@ def main():
         for b in sections:
             for c in etages:
                 for d in location:
-                    strings.append(f"S2S-{a}-{b}-{c}-{d}")
+                    strings.append(f"FB1-{b}{c}{d}")
 
-    result = subprocess.check_output(
-        ["./mkzpl.py", "-r 5", "-c 2"] + strings,
-        text=True
+
+    with tempfile.NamedTemporaryFile(mode="w", delete=False, encoding="utf-8") as tmp:
+        for s in strings:
+            tmp.write(s + "\n")
+        temp_path = tmp.name
+
+    result = subprocess.run(
+        ["./mkzpl.py", "--file", temp_path, "-r", "10", "-c", "2"],
     )
-    print(result)
+
+    print(result.stdout)
+    if result.stderr:
+        print(result.stderr, file=sys.stderr)
+
 
 if __name__ == '__main__':
     main()
